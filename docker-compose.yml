@@ -1,0 +1,39 @@
+version: '3.5'
+
+services:
+
+  ddweb-app:
+    container_name: ddweb
+    ports:
+      - 5000:80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DD_ENV=Development
+      - DD_SERVICE=ddweb
+      - DD_VERSION=1
+      - DD_AGENT_HOST=dd-agent
+      - DD_TRACE_AGENT_PORT=8126
+      - DD_LOGS_INJECTION=true
+      - DD_RUNTIME_METRICS_ENABLED=true
+    build:
+      context: ./
+      labels:
+        com.datadoghq.tags.env: "Development"
+        com.datadoghq.tags.service: "dockerapm"
+        com.datadoghq.tags.version: "1"
+    depends_on:
+      - dd-agent
+
+  dd-agent:
+    image: datadog/agent:latest
+    container_name: dd-agent
+    environment:
+      - DD_API_KEY=d99213c46ab27fd698f9cdb6fb9b3665
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+
